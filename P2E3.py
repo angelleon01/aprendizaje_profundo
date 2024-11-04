@@ -4,9 +4,10 @@ from scipy.special import lambertw
 # Constantes
 I0 = 1e-12
 eta = 1
-VT = 0.026 
+VT = 0.026
 R = 100
 Vcc_values = [3, 6, 9]
+
 
 # Calculo de VD
 def calculate_VD_steps(Vcc):
@@ -18,9 +19,10 @@ def calculate_VD_steps(Vcc):
     VD = a - eta * VT * W_result  # Calculo final de VD
     return VD
 
+
 # Calculamos el VD de cada Vcc
 VD = {Vcc: calculate_VD_steps(Vcc) for Vcc in Vcc_values}
-# print(VD)
+print(VD)
 
 
 # Datos y objetivos
@@ -30,74 +32,81 @@ alpha = 1  # Tasa de aprendizaje
 
 # Pesos y sesgos iniciales
 # Primera capa
-W1 = np.array([[0.05], [0.15], [-0.20]])  # (3, 1)
-b1 = np.array([[0.23], [-0.10], [0.17]])  # (3, 1)
+W1 = np.array([[0.05], [0.15], [-0.20]])  # (3x1)
+b1 = np.array([[0.23], [-0.10], [0.17]])  # (3x1)
 
 # Segunda capa
-W2 = np.array([[0.8, -0.6, 0.5], [0.7, 0.9, -0.6]])  # (2, 3)
-b2 = np.array([[0.45], [-0.34]])  # (2, 1)
+W2 = np.array([[0.8, -0.6, 0.5], [0.7, 0.9, -0.6]])  # (2x3)
+b2 = np.array([[0.45], [-0.34]])  # (2x1)
 
 # Capa de salida
-W3 = np.array([[0.8, 0.8]])  # (1, 2)
-b3 = np.array([[0.7]])  # (1, 1)
+W3 = np.array([[0.8, 0.8]])  # (1x2)
+b3 = np.array([[0.7]])  # (1x1)
+
 
 # Funciones de activación
 def sigmoid(x):
     return 1 / (1 + np.exp(-x))
 
+
 def sigmoid_derivative(x):
     return sigmoid(x) * (1 - sigmoid(x))
+
 
 def relu(x):
     return np.maximum(0, x)
 
+
 def relu_derivative(x):
     return (x > 0).astype(float)
+
 
 # Propagación hacia adelante
 def forward(X):
     # Primera capa
-    Z1 = W1 @ X.T + b1  # Ajustamos para que las dimensiones sean compatibles
-    A1 = sigmoid(Z1)
+    S = W1 @ X.T + b1  # Ajustamos para que las dimensiones sean compatibles
+    T = sigmoid(S)
 
     # Segunda capa
-    Z2 = W2 @ A1 + b2
-    A2 = relu(Z2)
+    U = W2 @ T + b2
+    V = relu(U)
 
     # Capa de salida
-    Z3 = W3 @ A2 + b3
-    A3 = Z3  # Lineal, sin activación
+    Y_pred = W3 @ V + b3
 
-    return Z1, A1, Z2, A2, Z3, A3
+    return S, T, U, V, Y_pred
+
 
 # Coste (MSE)
-def compute_cost(A3, Y):
+def compute_cost(Y, Y_pred):
     m = Y.shape[1]
-    cost = np.sum((A3 - Y) ** 2) / (2 * m)
+    cost = np.sum((Y - Y_pred) ** 2) / m
     return cost
 
+
 # Propagación hacia atrás (backpropagation)
-def backward(X, Y, Z1, A1, Z2, A2, Z3, A3):
+def backward(X, Y, S, T, U, V, Y_pred):
     m = X.shape[1]
 
     # Derivada de la capa de salida
-    dZ3 = A3 - Y  # dC/dZ3
-    dW3 = dZ3 @ A2.T / m
-    db3 = np.sum(dZ3, axis=1, keepdims=True) / m
+    dY_pred = Y_pred - Y  # dC/dY_pred
+    dW3 = dY_pred @ V.T / m
+    db3 = np.sum(dY_pred, axis=1, keepdims=True) / m
 
     # Derivadas de la segunda capa
-    dA2 = W3.T @ dZ3
-    dZ2 = dA2 * relu_derivative(Z2)
-    dW2 = dZ2 @ A1.T / m
-    db2 = np.sum(dZ2, axis=1, keepdims=True) / m
+    dV = W3.T @ dY_pred
+    dU = dV * relu_derivative(U)
+    dW2 = dU @ T.T / m
+    db2 = np.sum(dU, axis=1, keepdims=True) / m
 
     # Derivadas de la primera capa
-    dA1 = W2.T @ dZ2
-    dZ1 = dA1 * sigmoid_derivative(Z1)
-    dW1 = dZ1 @ X / m
-    db1 = np.sum(dZ1, axis=1, keepdims=True) / m
+    dT = W2.T @ dU
+    dS = dT * sigmoid_derivative(S)
+    dW1 = dS @ X / m
+    db1 = np.sum(dS, axis=1, keepdims=True) / m
 
     return dW1, db1, dW2, db2, dW3, db3
+
 
 # Actualización de pesos
 def update_parameters(dW1, db1, dW2, db2, dW3, db3):
@@ -109,11 +118,12 @@ def update_parameters(dW1, db1, dW2, db2, dW3, db3):
     W3 -= alpha * dW3
     b3 -= alpha * db3
 
+
 # Una época de entrenamiento
-Z1, A1, Z2, A2, Z3, A3 = forward(X)
-cost = compute_cost(A3, Y.T)
-dW1, db1, dW2, db2, dW3, db3 = backward(X, Y.T, Z1, A1, Z2, A2, Z3, A3)
+S, T, U, V, Y_pred = forward(X)
+cost = compute_cost(Y_pred, Y.T)
+dW1, db1, dW2, db2, dW3, db3 = backward(X, Y.T, S, T, U, V, Y_pred)
 update_parameters(dW1, db1, dW2, db2, dW3, db3)
 
 print("Coste:", cost)
-print("Predicciones finales:", A3.T)
+print("Predicciones finales:", Y_pred.T)
