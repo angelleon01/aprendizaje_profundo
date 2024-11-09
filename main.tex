@@ -11,6 +11,10 @@
 
 \usepackage[spanish, es-tabla]{babel} % Selecciona el español para palabras introducidas automáticamente, p.ej. "septiembre" en la fecha y especifica que se use la palabra Tabla en vez de Cuadro
 
+% ---- Grafos -----
+
+\usepackage{tikz}
+\usetikzlibrary{positioning}
 % ---- Para codigo -----
 
 \usepackage{listings} % Para incluir código
@@ -118,6 +122,11 @@ Alejandro Mayorga Caro\\
 %\pagebreak
 
 \section{Cuestión 1} 
+
+\begin{enumerate}
+    \item Calcular el valor de la función \( W_0 \) en tres puntos \( x_0 = 0 \, e^0 \), \( x_1 = 1 \, e^1 \), \( x_2 = 2 \, e^2 \).
+\end{enumerate}
+
 \begin{gather*}
     w_0 = f^{-1}(x)\\
     w_0(x \cdot e^{x}) = x
@@ -139,8 +148,225 @@ Y= \begin{bmatrix}
 \end{bmatrix}
 \end{gather*}
 
+
+\newpage
 \section{Cuestión 2}
+
+
+\begin{enumerate}
+    \item Entrenar la red neuronal de la figura 2 para la predicción de \( W_0 \) de acuerdo a los siguientes requisitos:
+    \begin{itemize}
+        \item La red dispone de una primera capa lineal con 3 neuronas, cuyos pesos iniciales son 
+        \(\begin{pmatrix} 0.15 & -0.10 & 0.12 \end{pmatrix}\) y sus sesgos \(\begin{pmatrix} 0.3 & -0.20 & 0.07 \end{pmatrix}\).
+        
+        \item La siguiente capa consta de funciones de activación sigmoidal.
+        
+        \item La salida de la red procede de una siguiente capa lineal con 1 neurona, con pesos iniciales 
+        \(\begin{pmatrix} 1.4 \\ 7.8 \\ 3.4 \end{pmatrix}\) y sesgo \(0.5\).
+    \end{itemize}
+    
+    \item El entrenamiento se realiza utilizando como función de coste 
+    \[
+    C = \frac{1}{m} \sum_{i=0}^{m} (W_0(x_i) - \hat{y}_i)^2,
+    \]
+    siendo \( \hat{y}_i \) la predicción de la red para el dato de entrada \( x_i \), y \( m \) el número de datos de entrenamiento.
+    
+    \item El entrenamiento se realiza utilizando la estrategia de descenso por gradiente con momento, utilizando para la primera iteración momento nulo al no disponer de mejor valor.
+    
+    \item Ajustar los parámetros de la red 1 época utilizando la técnica de diferenciación automática en modo reverse con tasa de aprendizaje igual a \( 0.01 \).
+\end{enumerate}
+
+\subsection{Resolución Analítica del Problema}
+
+\subsubsection{Definición de la red neuronal}
+
+La red neuronal a estudiar consta de tres capas, con una primera capa lineal de 3 neuronas, una segunda capa con funciones de activación sigmoidal y una tercera capa lineal con una neurona. Los pesos y sesgos iniciales de la red son los siguientes:
+
+\begin{itemize}
+    \item Primera capa:
+    \[
+    W_u = \begin{pmatrix} 0.15 & -0.10 & 0.12 \end{pmatrix}, \quad b_u = \begin{pmatrix} 0.3 & -0.20 & 0.07 \end{pmatrix}.
+    \]
+    
+    \item Capa de salida:
+    \[
+    W_y = \begin{pmatrix} 1.4 \\ 7.8 \\ 3.4 \end{pmatrix}, \quad b_y = 0.5.
+    \]
+
+\end{itemize}
+
+\subsubsection{Función de Coste}
+
+La función de coste utilizada para evaluar el rendimiento de la red neuronal es el error cuadrático medio (MSE), dado por:
+
+\[
+C = \frac{1}{m} \sum_{i=1}^m (W_o\cdot(X_i) - y_{i})^2,
+\]
+
+donde \( y_i \) es el valor real de la función \( W_0 \) en el punto \( X_i \) y \( m \) es el número de datos de entrenamiento.
+
+\subsection{Preparación de los Datos}
+
+Para realizar esta tarea se ha utilizado Python, con la librería \textit{numpy} para el manejo de matrices y vectores. 
+Primero se definen los datos como variables para poder trabajar con ellos. Se define la función de coste y se inicializan los pesos y sesgos de la red.
+
+\vspace{2mm}
+\begin{lstlisting}
+
+    X = np.array([[0 * e**0],
+    [1 * e**1],
+    [2 * e**2]])
+
+Y = np.array([[0],
+    [1],
+    [2]])
+
+Wu = np.array([[0.15, -0.10, 0.12]])
+bu = np.array([[0.3, -0.2, 0.07]])
+
+Wy = np.array([[1.4],
+     [7.8],
+     [3.4]])
+
+by = np.array([[0.5]])
+
+\end{lstlisting}
+\vspace{2mm}
+
+\subsection{Propagación hacia Adelante}
+
+Se realiza la propagación hacia adelante de la red neuronal, calculando las salidas de cada capa y la predicción final de la red. 
+
+\vspace{2mm}
+\begin{lstlisting}
+    V_3 = Wu
+    V_2 = bu
+    V_1 = Wy
+    V0 = by
+    V1 = X @ V_3 + np.ones((m, 1)) @ V_2
+    V2 = sigmoid(V1)
+    V3 = V2 @ V_1 + np.ones((m, 1)) @ V0
+    V4 = (1 / m) * ((Y - V3).T @ (Y - V3))
+    f = V4
+\end{lstlisting}
+\vspace{2mm}
+
+\subsection{Propagación hacia Atrás}
+
+Antes de realizar la propagación hacia atrás, se ajustarán los pesos y sesgos con un \textit{learning rate} de 0.01, para acto seguido realizar la propagación hacia atrás per se.
+
+\vspace{2mm}
+\begin{lstlisting}
+    V_3 = Wu
+    V_2 = bu
+    V_1 = Wy
+    V0 = by
+    V1 = X @ V_3 + np.ones((m, 1)) @ V_2
+    V2 = sigmoid(V1)
+    V3 = V2 @ V_1 + np.ones((m, 1)) @ V0
+    V4 = (1 / m) * ((Y - V3).T @ (Y - V3))
+    f = V4
+\end{lstlisting}
+\vspace{2mm}
+
+\subsection{Resultados}
+
+Tras realizar el proceso completo, se obtienen los siguientes valores para el coste, pesos y sesgos de la red neuronal dada:
+
+\begin{table}[H]
+    \centering
+    \renewcommand{\arraystretch}{1.5}
+    \begin{tabular}{|c|c|c|}
+    \hline
+    \textbf{Parámetro} & \textbf{Inicial} & \textbf{Final} \\
+    \hline
+    Coste & 29.59559685 & 13.69094522 \\
+    \hline
+    Wu & 
+    $\begin{pmatrix} 0.15 & -0.1 & 0.12 \end{pmatrix}$ &
+    $\begin{pmatrix} 0.08159339 & -0.68622434 & -0.11742454 \end{pmatrix}$ \\
+    \hline
+    bu & 
+    $\begin{pmatrix} 0.3 & -0.2 & 0.07 \end{pmatrix}$ &
+    $\begin{pmatrix} 0.27116171 & -0.37917983 & -0.00759286 \end{pmatrix}$ \\
+    \hline
+    Wy & 
+    $\begin{pmatrix} 1.4 \\ 7.8 \\ 3.4 \end{pmatrix}$ &
+    $\begin{pmatrix} 1.32598667 \\ 7.76211242 \\ 3.33274683 \end{pmatrix}$ \\
+    \hline
+    by & 0.5 & 0.39333115 \\
+    \hline
+    \end{tabular}
+\end{table}
+
+\newpage
 \section{Cuestión 3}
+
+Utilizando la red anterior para el cálculo de los valores objetivo de \( V_D \) en tres puntos \( (V_{cc} = 3, V_{cc} = 6, V_{cc} = 9) \), entrenar la red neuronal de la figura 3 para la predicción de \( V_D \) en función de \( V_{cc} \), con requisitos:
+
+\begin{itemize}
+    \item La red dispone de una primera capa lineal con 3 neuronas, cuyos pesos iniciales son 
+    \[
+    \begin{pmatrix}
+        0.05 & 0.15 & -0.20 
+    \end{pmatrix}
+    \]
+    y sus sesgos 
+    \[
+    \begin{pmatrix}
+        0.23 & -0.10 & 0.17 
+    \end{pmatrix}.
+    \]
+    
+    \item La siguiente capa consta de funciones de activación sigmoidal.
+    
+    \item La capa siguiente es lineal, con 2 neuronas, cuyos pesos iniciales son 
+    \[
+    \begin{pmatrix}
+        0.8 & -0.6 \\
+        0.7 & 0.9 \\
+        0.5 & -0.6 
+    \end{pmatrix}
+    \]
+    y sus sesgos 
+    \[
+    \begin{pmatrix}
+        0.45 & -0.34 
+    \end{pmatrix}.
+    \]
+    
+    \item La siguiente capa consta de funciones de activación ReLU.
+    
+    \item La salida de la red procede de una siguiente capa lineal con 1 neurona, con pesos iniciales 
+    \[
+    \begin{pmatrix}
+        0.8 \\
+        0.5 
+    \end{pmatrix}
+    \]
+    y sesgo \( 0.7 \).
+    
+    \item El entrenamiento se realiza utilizando como función de coste 
+    \[
+    C = \frac{1}{m} \sum_{i=0}^{2} (V_{D_i} - \hat{y}_i)^2,
+    \]
+    siendo \( \hat{y}_i \) la predicción de la red para el dato de entrada \( V_{cc_i} \), y \( m \) el número de datos de entrenamiento.
+    
+    \item El entrenamiento se realiza utilizando la estrategia de descenso por gradiente con momento, utilizando para la primera iteración momento nulo al no disponer de mejor valor.
+    
+    \item Ajustar los parámetros de la red 1 época utilizando la técnica de diferenciación automática en modo reverse.
+    
+    \item Valores típicos, para un diodo de germanio, podrían ser:
+    \begin{itemize}
+        \item \( I_0 = 10^{-12} \, \text{A} \),
+        \item \( \eta = 1 \),
+        \item \( V_T = 0.026 \, \text{V} \).
+    \end{itemize}
+    
+    \item Considere como valor de la resistencia \( R = 100 \, \Omega \).
+\end{itemize}
+
+
 
 Para resolver el ejercicio empezamos por calcular los valores objetivo de $V_D$ en los puntos ($V_{CC} = 3$, $V_{CC} = 6$, $V_{CC} = 9$).
 
