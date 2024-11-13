@@ -109,30 +109,24 @@ def backward(X, Y, S, T, U, V, Y_pred):
 
 
 # Actualización de pesos
-def update_parameters(dW1, db1, dW2, db2, dW3, db3, alpha=0.01, momentum=0):
+def update_parameters(dW1, db1, dW2, db2, dW3, db3, momentum_terms, alpha=0.01, momentum=0):
     global W1, b1, W2, b2, W3, b3
 
-    # Momentum terms
-    Ws_m = np.zeros_like(W1)
-    bs_m = np.zeros_like(b1)
-    Wu_m = np.zeros_like(W2)
-    bu_m = np.zeros_like(b2)
-    Wy_m = np.zeros_like(W3)
-    by_m = np.zeros_like(b3)
+    W1_m, b1_m, W2_m, b2_m, W3_m, b3_m = momentum_terms
 
-    Ws_m = momentum * Ws_m + (1 - momentum) * dW1
-    bs_m = momentum * bs_m + (1 - momentum) * db1
-    Wu_m = momentum * Wu_m + (1 - momentum) * dW2
-    bu_m = momentum * bu_m + (1 - momentum) * db2
-    Wy_m = momentum * Wy_m + (1 - momentum) * dW3
-    by_m = momentum * by_m + (1 - momentum) * db3
+    W1_m = momentum * W1_m + (1 - momentum) * dW1
+    b1_m = momentum * b1_m + (1 - momentum) * db1
+    W2_m = momentum * W2_m + (1 - momentum) * dW2
+    b2_m = momentum * b2_m + (1 - momentum) * db2
+    W3_m = momentum * W3_m + (1 - momentum) * dW3
+    b3_m = momentum * b3_m + (1 - momentum) * db3
 
-    W1 -= alpha * Ws_m
-    b1 -= alpha * bs_m
-    W2 -= alpha * Wu_m
-    b2 -= alpha * bu_m
-    W3 -= alpha * Wy_m
-    b3 -= alpha * by_m
+    W1 -= alpha * W1_m
+    b1 -= alpha * b1_m
+    W2 -= alpha * W2_m
+    b2 -= alpha * b2_m
+    W3 -= alpha * W3_m
+    b3 -= alpha * b3_m
 
 
 def diode_tension(X):
@@ -146,6 +140,14 @@ def main():
     lr = 0.01  # Ajusta según tus necesidades
     momentum = 0.5
     costs = []
+    # Momentum terms
+    W1_m = np.zeros_like(W1)
+    b1_m = np.zeros_like(b1)
+    W2_m = np.zeros_like(W2)
+    b2_m = np.zeros_like(b2)
+    W3_m = np.zeros_like(W3)
+    b3_m = np.zeros_like(b3)
+    momentum_terms = [W1_m, b1_m, W2_m, b2_m, W3_m, b3_m]
     for epoch in range(n_epochs):
         # Forward pass
         S, T, U, V, Y_pred = forward(X)
@@ -159,9 +161,9 @@ def main():
 
         # Actualización de parámetros
         if epoch == 0:
-            update_parameters(Ws, bs, Wu, bu, Wy, by, lr, 0)
+            update_parameters(Ws, bs, Wu, bu, Wy, by, momentum_terms, lr, 0)
         else:
-            update_parameters(Ws, bs, Wu, bu, Wy, by, lr, momentum)
+            update_parameters(Ws, bs, Wu, bu, Wy, by, momentum_terms, lr, momentum)
 
     # Cálculo del coste
     S, T, U, V, Y_pred = forward(X)

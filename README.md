@@ -9,7 +9,7 @@ Este repositorio contiene soluciones a los ejercicios propuestos en la segunda p
 - **P2E3_trained_lambert.py**: Archivo que contiene la solución para el Ejercicio 3 usando una implementación de la función `lambert` entrenada manualmente.
 - **P2E3_scipy_lambert.py**: Archivo que contiene la solución para el Ejercicio 3 usando `lambertw` de la librería `scipy.special`.
 - **requirements.txt**: Requerimientos usados por los archivos
-- **main.tex**: Memoria de la práctica en formato LaTeX
+- **APROF_P2.pdf**: Memoria de la práctica
 - **lambert_model.pkl**: Modelo entrenado en `P2E2.py` para la función de lambert. Contiene los pesos y bias de la red.
 - **VD_model.pkl**: Modelo entrenado en `P2E3_trained_lambert.py` para el cálculo de la tensión del diodo. Contiene los pesos y bias de la red.
 
