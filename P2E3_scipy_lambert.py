@@ -32,16 +32,16 @@ Y = np.array([[VD[3]], [VD[6]], [VD[9]]])  # Objetivo VD
 
 # Pesos y sesgos iniciales
 # Primera capa
-Ws = np.array([[0.05], [0.15], [-0.20]])  # (3x1)
-bs = np.array([[0.23], [-0.10], [0.17]])  # (3x1)
+W1 = np.array([[0.05], [0.15], [-0.20]])  # (3x1)
+b1 = np.array([[0.23], [-0.10], [0.17]])  # (3x1)
 
 # Segunda capa
-Wu = np.array([[0.8, -0.6, 0.5], [0.7, 0.9, -0.6]])  # (2x3)
-bu = np.array([[0.45], [-0.34]])  # (2x1)
+W2 = np.array([[0.8, -0.6, 0.5], [0.7, 0.9, -0.6]])  # (2x3)
+b2 = np.array([[0.45], [-0.34]])  # (2x1)
 
 # Capa de salida
-Wy = np.array([[0.8, 0.5]])  # (1x2)
-by = np.array([[0.7]])  # (1x1)
+W3 = np.array([[0.8, 0.5]])  # (1x2)
+b3 = np.array([[0.7]])  # (1x1)
 
 
 # Funciones de activación
@@ -64,15 +64,15 @@ def relu_derivative(x):
 # Propagación hacia adelante
 def forward(X):
     # Primera capa
-    S = Ws @ X.T + bs  # Ajustamos para que las dimensiones sean compatibles
+    S = W1 @ X.T + b1  # Ajustamos para que las dimensiones sean compatibles
     T = sigmoid(S)
 
     # Segunda capa
-    U = Wu @ T + bu
+    U = W2 @ T + b2
     V = relu(U)
 
     # Capa de salida
-    Y_pred = Wy @ V + by
+    Y_pred = W3 @ V + b3
 
     return S, T, U, V, Y_pred
 
@@ -94,13 +94,13 @@ def backward(X, Y, S, T, U, V, Y_pred):
     db3 = np.sum(dY_pred, axis=1, keepdims=True) / m
 
     # Derivadas de la segunda capa
-    dV = Wy.T @ dY_pred
+    dV = W3.T @ dY_pred
     dU = dV * relu_derivative(U)
     dW2 = dU @ T.T / m
     db2 = np.sum(dU, axis=1, keepdims=True) / m
 
     # Derivadas de la primera capa
-    dT = Wu.T @ dU
+    dT = W2.T @ dU
     dS = dT * sigmoid_derivative(S)
     dW1 = dS @ X / m
     db1 = np.sum(dS, axis=1, keepdims=True) / m
@@ -110,15 +110,15 @@ def backward(X, Y, S, T, U, V, Y_pred):
 
 # Actualización de pesos
 def update_parameters(dW1, db1, dW2, db2, dW3, db3, alpha=0.01, momentum=0):
-    global Ws, bs, Wu, bu, Wy, by
+    global W1, b1, W2, b2, W3, b3
 
     # Momentum terms
-    Ws_m = np.zeros_like(Ws)
-    bs_m = np.zeros_like(bs)
-    Wu_m = np.zeros_like(Wu)
-    bu_m = np.zeros_like(bu)
-    Wy_m = np.zeros_like(Wy)
-    by_m = np.zeros_like(by)
+    Ws_m = np.zeros_like(W1)
+    bs_m = np.zeros_like(b1)
+    Wu_m = np.zeros_like(W2)
+    bu_m = np.zeros_like(b2)
+    Wy_m = np.zeros_like(W3)
+    by_m = np.zeros_like(b3)
 
     Ws_m = momentum * Ws_m + (1 - momentum) * dW1
     bs_m = momentum * bs_m + (1 - momentum) * db1
@@ -127,12 +127,12 @@ def update_parameters(dW1, db1, dW2, db2, dW3, db3, alpha=0.01, momentum=0):
     Wy_m = momentum * Wy_m + (1 - momentum) * dW3
     by_m = momentum * by_m + (1 - momentum) * db3
 
-    Ws -= alpha * Ws_m
-    bs -= alpha * bs_m
-    Wu -= alpha * Wu_m
-    bu -= alpha * bu_m
-    Wy -= alpha * Wy_m
-    by -= alpha * by_m
+    W1 -= alpha * Ws_m
+    b1 -= alpha * bs_m
+    W2 -= alpha * Wu_m
+    b2 -= alpha * bu_m
+    W3 -= alpha * Wy_m
+    b3 -= alpha * by_m
 
 
 def diode_tension(X):
@@ -184,10 +184,7 @@ def main():
     I = I0 * (e ** (Vd / (eta * VT)) - 1)
     Vr = R * I
 
-    print("VD:", Vd)
-
     print("VR:", Vr)
-
 
 if __name__ == "__main__":
     main()
