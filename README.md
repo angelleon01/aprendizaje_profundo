@@ -1,6 +1,6 @@
-# Ejercicios de Programación
+# Práctica 2
 
-Este repositorio contiene soluciones a diversos ejercicios de programación, con los enunciados disponibles en formato PNG en la carpeta `exercises`. Los archivos de código para cada ejercicio están nombrados siguiendo la convención **P**ractica-**E**jercicio (Ejemplo: `P2E2.py` para la Parte 2 de la Práctica 2). A continuación, se detalla la estructura del repositorio y la funcionalidad de cada archivo.
+Este repositorio contiene soluciones a los ejercicios propuestos en la segunda práctica, con los enunciados disponibles en formato PNG en la carpeta `exercises`. Los archivos de código para cada ejercicio están nombrados siguiendo la convención **P**ractica-**E**jercicio (Ejemplo: `P2E2.py` para la Parte 2 de la Práctica 2). A continuación, se detalla la estructura del repositorio y la funcionalidad de cada archivo.
 
 ## Estructura del repositorio
 
