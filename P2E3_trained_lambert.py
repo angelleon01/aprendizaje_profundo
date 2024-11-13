@@ -1,11 +1,15 @@
-import numpy as np
-from math import e
-import matplotlib.pyplot as plt
 import pickle
+from math import e
+
+import matplotlib.pyplot as plt
+import numpy as np
+
 from P2E2 import lambert, sigmoid
+
 
 def ReLU(x):
     return np.maximum(0, x)
+
 
 def train_VD(X, Y, epochs):
     m = X.shape[0]
@@ -16,19 +20,16 @@ def train_VD(X, Y, epochs):
 
     bs = np.array([[0.23, -0.10, 0.17]])
 
-    Wu = np.array([[0.8, -0.6],
-                   [0.7,  0.9],
-                   [0.5, -0.6]])
-    
+    Wu = np.array([[0.8, -0.6], [0.7, 0.9], [0.5, -0.6]])
+
     bu = np.array([[0.45, -0.34]])
 
-    Wy = np.array([[0.8],
-                   [0.5]])
-    
+    Wy = np.array([[0.8], [0.5]])
+
     by = np.array([[0.7]])
 
     # Costs
-    fs = np.zeros((epochs+1, 1))
+    fs = np.zeros((epochs + 1, 1))
 
     # Momentum terms
     Ws_m = np.zeros_like(Ws)
@@ -56,11 +57,13 @@ def train_VD(X, Y, epochs):
 
         # Backward pass
         # V6_ = 1
-        V5_ = -2/m * (Y - V5)
+        V5_ = -2 / m * (Y - V5)
         V4_ = V5_ @ V_1.T
-        V3_ = V4_ * (V3 > 0) # ReLU derivative
+        V3_ = V4_ * (V3 > 0)  # ReLU derivative
         V2_ = V3_ @ V_3.T
-        V1_ = V2_ * V2 * (np.ones((V2.shape[0], V2.shape[1])) - V2) # Sigmoid derivative
+        V1_ = (
+            V2_ * V2 * (np.ones((V2.shape[0], V2.shape[1])) - V2)
+        )  # Sigmoid derivative
         V0_ = np.ones((m, 1)).T @ V5_
         V_1_ = V4.T @ V5_
         V_2_ = np.ones((m, 1)).T @ V3_
@@ -105,14 +108,22 @@ def train_VD(X, Y, epochs):
 
     return Ws, bs, Wu, bu, Wy, by, fs
 
+
 def diode_tension(X):
     m = X.shape[0]
 
     # Load weights and biases
-    with open('VD_model.pkl', 'rb') as f:
+    with open("VD_model.pkl", "rb") as f:
         weights = pickle.load(f)
-    Ws, bs, Wu, bu, Wy, by = weights['Ws'], weights['bs'], weights['Wu'], weights['bu'], weights['Wy'], weights['by']
-    
+    Ws, bs, Wu, bu, Wy, by = (
+        weights["Ws"],
+        weights["bs"],
+        weights["Wu"],
+        weights["bu"],
+        weights["Wy"],
+        weights["by"],
+    )
+
     layer1 = X @ Ws + np.ones((m, 1)) @ bs
     layer2 = sigmoid(layer1)
     layer3 = layer2 @ Wu + np.ones((m, 1)) @ bu
@@ -121,21 +132,19 @@ def diode_tension(X):
 
     return layer5
 
-def main():
 
+def main():
     # Getting VD using the Lambert function from P2E2
     I0 = 1e-12
     ETA = 1
     VT = 0.026
     R = 100
 
-    VCC = np.array([[3],
-                    [6],
-                    [9]])
-    
-    W0 = lambert(R*I0/(ETA*VT)*e**((VCC + R*I0)/(ETA*VT))).real
+    VCC = np.array([[3], [6], [9]])
 
-    VD = VCC + R*I0 - ETA*VT*W0
+    W0 = lambert(R * I0 / (ETA * VT) * e ** ((VCC + R * I0) / (ETA * VT))).real
+
+    VD = VCC + R * I0 - ETA * VT * W0
 
     # Input data
     X = VCC
@@ -143,7 +152,7 @@ def main():
 
     # Hyperparameters
     epochs = 1
-    
+
     Ws, bs, Wu, bu, Wy, by, fs = train_VD(X, Y, epochs)
 
     print("Cost:", fs[-1])
@@ -153,25 +162,26 @@ def main():
     print("bu:", bu)
     print("Wy:\n", Wy)
     print("by:", by)
-    
+
     # Plot cost
-    plt.plot(range(epochs+1), fs)
-    plt.xlabel('Epoch')
-    plt.ylabel('Cost')
-    plt.title('Cost evolution')
+    plt.plot(range(epochs + 1), fs)
+    plt.xlabel("Epoch")
+    plt.ylabel("Cost")
+    plt.title("Cost evolution")
     plt.show()
-    
+
     # Save weights and biases
-    with open('VD_model.pkl', 'wb') as f:
-        pickle.dump({'Ws': Ws, 'bs': bs, 'Wu': Wu, 'bu': bu, 'Wy': Wy, 'by': by}, f)
+    with open("VD_model.pkl", "wb") as f:
+        pickle.dump({"Ws": Ws, "bs": bs, "Wu": Wu, "bu": bu, "Wy": Wy, "by": by}, f)
 
     # Get Vr using the trained model
     VD = diode_tension(X)
-    I = I0 * (e**(VD/(ETA*VT)) - 1)
+    I = I0 * (e ** (VD / (ETA * VT)) - 1)
     VR = R * I
 
     print("VD:", VD)
     print("VR:", VR)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

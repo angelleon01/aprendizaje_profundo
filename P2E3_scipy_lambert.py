@@ -1,7 +1,8 @@
+from math import e
+
+import matplotlib.pyplot as plt
 import numpy as np
 from scipy.special import lambertw
-from math import e
-import matplotlib.pyplot as plt
 
 # Constantes
 I0 = 1e-12
@@ -9,6 +10,7 @@ eta = 1
 VT = 0.026
 R = 100
 Vcc_values = [3, 6, 9]
+
 
 # Calculo de VD
 def calculate_VD_steps(Vcc):
@@ -20,11 +22,12 @@ def calculate_VD_steps(Vcc):
     VD = a - eta * VT * W_result  # Calculo final de VD
     return VD
 
+
 # Calculamos el VD de cada Vcc
 VD = {Vcc: calculate_VD_steps(Vcc) for Vcc in Vcc_values}
 
 # Datos y objetivos
-X = np.array([[3], [6], [9]])   # Entradas Vcc (3 filas x 1 columna)
+X = np.array([[3], [6], [9]])  # Entradas Vcc (3 filas x 1 columna)
 Y = np.array([[VD[3]], [VD[6]], [VD[9]]])  # Objetivo VD
 
 # Pesos y sesgos iniciales
@@ -39,6 +42,7 @@ bu = np.array([[0.45], [-0.34]])  # (2x1)
 # Capa de salida
 Wy = np.array([[0.8, 0.5]])  # (1x2)
 by = np.array([[0.7]])  # (1x1)
+
 
 # Funciones de activación
 def sigmoid(x):
@@ -130,12 +134,13 @@ def update_parameters(dW1, db1, dW2, db2, dW3, db3, alpha=0.01, momentum=0):
     Wy -= alpha * Wy_m
     by -= alpha * by_m
 
+
 def diode_tension(X):
     S, T, U, V, Y_pred = forward(X)
     return Y_pred.T
 
-def main():
 
+def main():
     # Número de épocas y tasa de aprendizaje
     n_epochs = 1  # Ajusta esto al número de épocas deseado
     lr = 0.01  # Ajusta según tus necesidades
@@ -144,14 +149,14 @@ def main():
     for epoch in range(n_epochs):
         # Forward pass
         S, T, U, V, Y_pred = forward(X)
-        
+
         # Cálculo del coste
         cost = compute_cost(Y_pred, Y.T)
         costs.append(cost)
-        
+
         # Backward pass
         Ws, bs, Wu, bu, Wy, by = backward(X, Y.T, S, T, U, V, Y_pred)
-        
+
         # Actualización de parámetros
         if epoch == 0:
             update_parameters(Ws, bs, Wu, bu, Wy, by, lr, 0)
@@ -169,19 +174,20 @@ def main():
     print("Final predictions:", Vd)
 
     # Plot de la función de coste
-    plt.plot(range(n_epochs+1), costs)
+    plt.plot(range(n_epochs + 1), costs)
     plt.xlabel("Epoch")
     plt.ylabel("Cost")
     plt.title("Cost evolution")
     plt.show()
 
     # Get Vr using the trained model
-    I = I0 * (e**(Vd/(eta*VT)) - 1)
+    I = I0 * (e ** (Vd / (eta * VT)) - 1)
     Vr = R * I
 
     print("VD:", Vd)
 
     print("VR:", Vr)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

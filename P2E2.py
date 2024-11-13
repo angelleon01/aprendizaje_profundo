@@ -1,12 +1,15 @@
-import numpy as np
-from math import e
-import matplotlib.pyplot as plt
-from scipy.special import expit
 import pickle
+from math import e
+
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy.special import expit
+
 
 # Sigmoid function
 def sigmoid(x):
     return expit(x)
+
 
 # Train Lambert model
 def train_lambert(X, Y, epochs):
@@ -17,14 +20,12 @@ def train_lambert(X, Y, epochs):
     Wu = np.array([[0.15, -0.10, 0.12]])
     bu = np.array([[0.3, -0.2, 0.07]])
 
-    Wy = np.array([[1.4],
-                   [7.8],
-                   [3.4]])
+    Wy = np.array([[1.4], [7.8], [3.4]])
 
     by = np.array([[0.5]])
 
     # Costs
-    fs = np.zeros((epochs+1, 1))
+    fs = np.zeros((epochs + 1, 1))
 
     # Momentum terms
     Wu_m = np.zeros_like(Wu)
@@ -46,7 +47,7 @@ def train_lambert(X, Y, epochs):
 
         # Backward pass
         # V4_ = 1
-        V3_ = -2/m * (Y - V3)
+        V3_ = -2 / m * (Y - V3)
         V2_ = V3_ @ V_1.T
         V1_ = V2_ * V2 * (np.ones((V2.shape[0], V2.shape[1])) - V2)
         V0_ = np.ones((m, 1)).T @ V3_
@@ -59,7 +60,7 @@ def train_lambert(X, Y, epochs):
             beta = 0
         elif i == 1:
             beta = mf
-        
+
         Wu_m = beta * Wu_m + (1 - beta) * V_3_
         bu_m = beta * bu_m + (1 - beta) * V_2_
         Wy_m = beta * Wy_m + (1 - beta) * V_1_
@@ -83,27 +84,25 @@ def train_lambert(X, Y, epochs):
 
     return Wu, bu, Wy, by, fs
 
+
 def lambert(X):
     # Load weights and biases
-    with open('lambert_model.pkl', 'rb') as f:
+    with open("lambert_model.pkl", "rb") as f:
         weights = pickle.load(f)
-    Wu, bu, Wy, by = weights['Wu'], weights['bu'], weights['Wy'], weights['by']
-    
+    Wu, bu, Wy, by = weights["Wu"], weights["bu"], weights["Wy"], weights["by"]
+
     layer1 = X @ Wu + np.ones((X.shape[0], 1)) @ bu
     layer2 = sigmoid(layer1)
     layer3 = layer2 @ Wy + np.ones((X.shape[0], 1)) @ by
 
     return layer3
 
+
 def main():
     # Input data
-    X = np.array([[0 * e**0],
-                  [1 * e**1],
-                  [2 * e**2]])
+    X = np.array([[0 * e**0], [1 * e**1], [2 * e**2]])
 
-    Y = np.array([[0],
-                  [1],
-                  [2]])
+    Y = np.array([[0], [1], [2]])
 
     # Hyperparameters
     epochs = 1
@@ -116,18 +115,16 @@ def main():
     print("by:", by)
 
     # Plot cost
-    plt.plot(range(epochs+1), fs)
-    plt.xlabel('Epochs')
-    plt.ylabel('Cost')
-    plt.title('Cost evolution')
+    plt.plot(range(epochs + 1), fs)
+    plt.xlabel("Epochs")
+    plt.ylabel("Cost")
+    plt.title("Cost evolution")
     plt.show()
 
-    """
     # Save weights and biases
-    with open('lambert_model.pkl', 'wb') as f:
-        pickle.dump({'Wu': Wu, 'bu': bu, 'Wy': Wy, 'by': by}, f)
-    """
-    
+    with open("lambert_model.pkl", "wb") as f:
+        pickle.dump({"Wu": Wu, "bu": bu, "Wy": Wy, "by": by}, f)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()
