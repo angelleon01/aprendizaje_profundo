@@ -116,9 +116,9 @@ En este caso se ha inicializado con los siguientes valores:
 Si bien es importante recalcar que el valor \textbf{random\_state} no tiene ningún efecto muy significativo, pues únicamente sirve para asegurar la replicabilidad de las pruebas que se realizan. 
 
 \begin{figure}[H]
-\caption{Representación del conjunto \textit{moons dataset}}
 \centering
 \includegraphics[width=0.5\textwidth]{images/moons_plot.png}
+\caption{Representación del conjunto \textit{moons dataset}}
 \end{figure}
 
 Como puede verse, este conjunto no puede separarse de manera precisa mediante un clasificador lineal, por lo que cumple a la perfección los requisitos de la tarea.
@@ -163,12 +163,12 @@ Test set shape: (400, 2) (400,)
 
 \end{verbatim}
 
-Si mostramos uno de los sets podremos confirmar que los datos que se han extraído siguen estando generalizados con respecto al conjunto inicial:
+Si mostramos uno de los sets, podremos confirmar que los datos que se han extraído siguen estando generalizados con respecto al conjunto inicial:
 
 \begin{figure}[H]
-\caption{Representación del conjunto de test generado}
 \centering
 \includegraphics[width=0.5\textwidth]{images/test_output.png}
+\caption{Representación del conjunto de test generado}
 \end{figure}
 
 \subsection{Creación de la red neuronal}
@@ -176,12 +176,13 @@ Si mostramos uno de los sets podremos confirmar que los datos que se han extraí
 Para realizar la división del conjunto se utilizará una red neuronal con modelo \textbf{secuencial}. Constará de las capas propuestas a continuación:
 
 \begin{figure}[H]
-\caption{Representación de la red neuronal escogida}
 \centering
 \includegraphics[width=0.3\textwidth]{images/graph.png}
+\label{fig:graph}
+\caption{Representación de la red neuronal escogida}
 \end{figure}
 
-También se utilizará un valor de \textbf{\textit{learning rate}} de 0.001 para conseguir que el modelo aprenda de manera estable y el modelo converja más rápidamente.
+También se utilizará un valor de \textbf{\textit{learning rate}} de 0.001 para conseguir que el modelo aprenda de manera estable y que el modelo converja más rápidamente.
 
 \begin{verbatim}
 # Create the MLP
@@ -231,7 +232,7 @@ bs = xtrn.shape[0]//5
 history = model.fit(xtrn, ytrn, epochs=220, batch_size=bs, validation_data=(xval, yval))
 \end{verbatim}
 
-Una vez entrenado, y para obtener los valores que realmente son relevantes, evaluamos el modelo en el conjunto de test. Esto nos permitirá comprobar si la red generaliza bien, si se ajusta demasiado a los datos (\textit{overfitting}), o si no es suficientemente potente y no se ajusta lo necesario (\textit{underfitting}).
+Una vez entrenado, y para obtener los valores que realmente son relevantes, evaluamos el modelo en el conjunto de test. Esto nos permitirá comprobar si la red generaliza bien, si se ajusta demasiado a los datos (\textit{overfitting}), o si no es lo suficientemente potente y no se ajusta lo necesario (\textit{underfitting}).
 
 \begin{verbatim}
     test_loss, test_accuracy = model.evaluate(xtst, ytst)  # xtst y ytst son los datos de prueba
@@ -321,6 +322,18 @@ Los gráficos que se presentan corresponden a los límites de decisión (\textit
 Cada gráfico representa la activación de una neurona específica en función de las dos características de entrada (\textit{Feature 1} y \textit{Feature 2}). 
 
 Las zonas rojas indican activaciones altas, mientras que las zonas azules indican activaciones bajas o nulas. Neuronas con límites claros entre zonas (como las Neuronas 1, 3 y 4) están captando patrones relevantes en los datos. Por otro lado, neuronas como la Neurona 5, con una activación uniforme, podrían tener menor relevancia para el modelo.
+
+
+\section{Conclusiones}
+En esta práctica se ha llevado a cabo el entrenamiento de una red MPL multicapa con el fin de clasificar los datos de un conjunto difícilmente separable, en este caso utilizando el dataset \textit{Moons Dataset}. A lo largo del proyecto, se abordaron las siguientes etapas clave: análisis del dataset, preprocesamiento, diseño de la red neuronal, entrenamiento y un estudio detallado de las transformaciones realizadas en cada capa de la red.
+
+Tras diseñar la red como aparece en la figura \ref{fig:graph} y entrenarla con el dataset (64\% Entrenamiento, 16\% validación y 20\% test), obtenemos una precisión del 94.95\%, lo cual muestra un desempeño notable del modelo. Esto evidencia que el modelo fue capaz de generalizar adecuadamente y de evitar problemas de overfitting o underfitting, demostrando estabilidad durante el proceso de aprendizaje.
+
+Después de obtener este resultado, se han analizado los resultados generados capa por capa hasta llegar al resultado final y esto ha permitido comprender cómo la red ha sido capaz de transformar el espacio de entrada inicial en representaciones abstractas pero linealmente separables.
+
+En resumen, este proyecto ha demostrado el potencial de las redes MPL multicapa para resolver problemas de clasificación difícilmente separables, analizando también los resultados obtenidos capa a capa.
+
+
 
 \newpage
 \appendix
