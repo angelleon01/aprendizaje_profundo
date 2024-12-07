@@ -1,0 +1,23 @@
+\documentclass[tikz,border=10pt]{standalone}
+\usepackage{amsmath}
+
+\begin{document}
+
+\begin{tikzpicture}[node distance=1.5cm,>=stealth']
+
+    % Layers
+    \node (input) [draw, rounded corners, minimum width=3cm, minimum height=1cm, align=center] at (0, 0) {Input Layer \\ Shape: (2)};
+    \node (layer1) [draw, rounded corners, minimum width=3cm, minimum height=1cm, align=center, below of=input] {Dense \\ Units: 28 \\ Activation: ReLU};
+    \node (layer2) [draw, rounded corners, minimum width=3cm, minimum height=1cm, align=center, below of=layer1] {Dense \\ Units: 8 \\ Activation: ReLU};
+    \node (layer3) [draw, rounded corners, minimum width=3cm, minimum height=1cm, align=center, below of=layer2] {Dense \\ Units: 4 \\ Activation: ReLU};
+    \node (output) [draw, rounded corners, minimum width=3cm, minimum height=1cm, align=center, below of=layer3] {Output Layer \\ Units: 2 \\ Activation: Softmax};
+
+    % Connections
+    \draw[->] (input.south) -- (layer1.north);
+    \draw[->] (layer1.south) -- (layer2.north);
+    \draw[->] (layer2.south) -- (layer3.north);
+    \draw[->] (layer3.south) -- (output.north);
+
+\end{tikzpicture}
+
+\end{document}
