@@ -73,7 +73,7 @@
 \normalfont \normalsize 
 \textsc{{\textbf{Aprendizaje Profundo (2024-2025)}} \\ Máster en Robótica e Inteligencia Artificial \\ Universidad de León} \\ [20pt] % Your university, school and/or department name(s)
 \horrule{0.5pt} \\[0.4cm] % Thin top horizontal rule
-\huge Práctica 3 \\   % The assignment title
+\huge Práctica 4 \\   % The assignment title
 \horrule{1.5pt} \\[0.2cm] % Thick bottom horizontal rule
 }
 
@@ -131,7 +131,8 @@ El conjunto generado tiene un total de 600 muestras, distribuidas equitativament
 
 \section{Métodos de Reducción de Dimensionalidad}
 
-En esta sección se aplicarán diferentes métodos de reducción de dimensionalidad, con el objetivo de simplificar los datos, mejorar el rendimiento del modelo a aplicar, y simplificar la visualización del \textit{dataset}.random_state=42
+En esta sección se muestran los diferentes métodos de reducción de dimensionalidad que se han utilizado, con el objetivo de simplificar los datos, mejorar el rendimiento del modelo a aplicar y simplificar la visualización del \textit{dataset}.
+
 Los métodos aplicados para reducir las dimensiones de los datos son los siguientes:
 
 \subsection{Sammon Mapping}
@@ -210,7 +211,8 @@ def build_encoder_decoder(input_dim=10, encoded_dim=2):
     encoded = layers.Dense(8, activation='relu', name='Dense8_encoder')(input_layer)
     encoded = layers.Dense(6, activation='relu', name='Dense6_encoder')(encoded)
     encoded = layers.Dense(4, activation='relu', name='Dense4_encoder')(encoded)
-    encoded = layers.Dense(encoded_dim, activation='linear', name=f'Dense{encoded_dim}')(encoded)
+    encoded = layers.Dense(encoded_dim, activation='linear', name=f'Dense{encoded_dim}')
+                                                                               (encoded)
 
     # Decoder
     decoded = layers.Dense(4, activation='relu', name='Dense4_decoder')(encoded)
@@ -238,7 +240,7 @@ Posteriormente se dividirán los datos en tres conjuntos (entrenamiento, validac
 
 \end{verbatim}
 
-Este modelo se entrenará durante 150 épocas, con un valor de \textit{batch\_size} de \lstinline{xtrn.shape[0]//4}. Se utilizará \textit{Early-stopping}.
+Este modelo fue entrenado durante 150 épocas, con un valor de \textit{batch\_size} de \lstinline{xtrn.shape[0]//4} y utilizando \textit{Early-stopping}.
 
 Esto otorga unos resultados positivos en pérdidas, como se puede ver en la siguiente gráfica:
 
@@ -259,13 +261,41 @@ Se realiza la reconstrucción del conjunto de datos para comprobar que todo ha f
 
 \subsection{Clasificador con Encoder Congelado}
 
-Por último, se va a realizar un clasificador congelando el \textit{encoder}. 
+Por último, se realizó un clasificador (Fully Connected + Softmax) que se entrenó congelando el \textit{encoder}. Para ello, se creó el modelo secuencial para la clasificación con una capa densa de activación Softmax que clasificase las 3 clases y se compiló con early stopping.
+De este modo, tras entrenarlo con 150 épocas, terminó el entrenamiento con los siguientes resultados:
 
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{images/accuracy_loss_frozenencoder.png}
+\caption{Gráfica de la pérdida del modelo de clasificación.}
+\end{figure}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{images/accuracy_frozenencoder.png}
+\caption{Gráfica de la precisión del modelo de clasificación.}
+\end{figure}
 
 \section{Resultados}
 
+El modelo clasificador logró una precisión del 100 \% al predecir las etiquetas del conjunto de prueba. La siguiente gráfica muestra la proyección de las representaciones comprimidas en generadas por el encoder y la clasificación asignada por el modelo:
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{images/decision_boundaries.png}
+\caption{Representación de la clasificación del modelo.}
+\end{figure}
+
+Esto confirma la capacidad del pipeline completo para separar efectivamente las clases originales en un espacio reducido, preservando la estructura de los datos.
+
+
+
+
 
 \section{Conclusión}
+
+En esta práctica se implementaron diversas técnicas de reducción de dimensionalidad y clasificación, utilizando un conjunto de datos sintético generado en \(\mathbb{R}^{10}\). Estas técnicas incluyeron métodos tradicionales como Sammon Mapping, PCA, LDA y t-SNE, así como un enfoque basado en aprendizaje profundo mediante una red neuronal Encoder-Decoder.
+
+Los resultados demostraron que las técnicas implementadas son efectivas para reducir la dimensionalidad del dataset, preservando la separación entre las clases en el espacio proyectado. En particular, el método t-SNE mostró su capacidad para identificar agrupamientos locales no lineales, mientras que LDA maximizó la separación entre clases usando información supervisada. Por otro lado, el Encoder-Decoder logró aprender representaciones comprimidas en \(\mathbb{R}^{2}\), que fueron utilizadas con éxito para clasificar las muestras con una precisión del 100 \% al congelar el encoder y añadir una cabeza de clasificación.
 
 \newpage
 \appendix
@@ -276,3 +306,4 @@ El código relacionado con este documento está disponible en el siguiente enlac
 \end{center}
 
 \end{document}
+
